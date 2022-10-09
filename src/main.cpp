@@ -1,3 +1,4 @@
+#include <cassert>
 #include <vector>
 #include <unordered_map>
 #include <glm/vec3.hpp>
@@ -50,17 +51,21 @@ std::vector<glm::vec<3, unsigned int>> subdivideMesh(
 ) {
 	std::vector<glm::vec<3, unsigned int>> result;
 	MeshEdgeCache cache;
+	result.reserve(triangles.size() * 4);
+	cache.reserve(triangles.size() + triangles.size() / 2);
 	for (auto &triangle : triangles) {
-	unsigned int mid[] = {
-			midVertexForEdge(cache, vertexes, triangle[0], triangle[1]),
-			midVertexForEdge(cache, vertexes, triangle[1], triangle[2]),
-			midVertexForEdge(cache, vertexes, triangle[2], triangle[0])
-	};
-	result.emplace_back(triangle[0], mid[0], mid[2]);
-	result.emplace_back(triangle[1], mid[1], mid[0]);
-	result.emplace_back(triangle[2], mid[2], mid[1]);
-	result.emplace_back(mid[0], mid[1], mid[2]);
+		unsigned int mid[] = {
+				midVertexForEdge(cache, vertexes, triangle[0], triangle[1]),
+				midVertexForEdge(cache, vertexes, triangle[1], triangle[2]),
+				midVertexForEdge(cache, vertexes, triangle[2], triangle[0])
+		};
+		result.emplace_back(triangle[0], mid[0], mid[2]);
+		result.emplace_back(triangle[1], mid[1], mid[0]);
+		result.emplace_back(triangle[2], mid[2], mid[1]);
+		result.emplace_back(mid[0], mid[1], mid[2]);
 	}
+	assert(result.size() == triangles.size() * 4);
+	assert(cache.size() == triangles.size() + triangles.size() / 2);
 	return result;
 }
 
