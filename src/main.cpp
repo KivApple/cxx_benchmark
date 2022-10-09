@@ -45,14 +45,14 @@ unsigned int midVertexForEdge(
 	return it->second;
 }
 
-std::vector<glm::vec<3, unsigned int>> subdivideMesh(
+void subdivideMesh(
 		std::vector<glm::vec3> &vertexes,
-		const std::vector<glm::vec<3, unsigned int>> &triangles
+		const std::vector<glm::vec<3, unsigned int>> &triangles,
+		MeshEdgeCache &cache,
+		std::vector<glm::vec<3, unsigned int>> &result
 ) {
-	std::vector<glm::vec<3, unsigned int>> result;
-	MeshEdgeCache cache;
-	result.reserve(triangles.size() * 4);
-	cache.reserve(triangles.size() + triangles.size() / 2);
+	cache.clear();
+	result.clear();
 	for (auto &triangle : triangles) {
 		unsigned int mid[] = {
 				midVertexForEdge(cache, vertexes, triangle[0], triangle[1]),
@@ -66,7 +66,6 @@ std::vector<glm::vec<3, unsigned int>> subdivideMesh(
 	}
 	assert(result.size() == triangles.size() * 4);
 	assert(cache.size() == triangles.size() + triangles.size() / 2);
-	return result;
 }
 
 std::pair<std::vector<glm::vec3>, std::vector<glm::vec<3, unsigned int>>> generateMesh(int subdivisionCount) {
@@ -87,17 +86,32 @@ std::pair<std::vector<glm::vec3>, std::vector<glm::vec<3, unsigned int>>> genera
 			{6, 1, 10}, {9, 0, 11}, {9, 11, 2}, {9, 2, 5}, {7, 2, 11}
 	};
 	
-	auto predictedTriangleCount = vertexes.size();
+	std::vector<glm::vec<3, unsigned int>> tmpTriangles;
+
+	MeshEdgeCache cache;
+
+	auto predictedVertexCount = vertexes.size();
+	auto predictedTriangleCount = triangles.size();
+	size_t predictedCacheSize = 0;
 	for (int i = 0; i < subdivisionCount; i++) {
-		predictedTriangleCount = predictedTriangleCount * 4 - 6;
+		predictedCacheSize = predictedTriangleCount + predictedTriangleCount / 2;
+		predictedVertexCount = predictedVertexCount * 4 - 6;
+		predictedTriangleCount *= 4;
 	}
-	vertexes.reserve(predictedTriangleCount);
+	
+	cache.reserve(predictedCacheSize);
+	vertexes.reserve(predictedVertexCount);
+	triangles.reserve(predictedTriangleCount);
+	tmpTriangles.reserve(predictedTriangleCount);
 	
 	for (int i = 0; i < subdivisionCount; i++) {
-		triangles = subdivideMesh(vertexes, triangles);
+		subdivideMesh(vertexes, triangles, cache, tmpTriangles);
+		std::swap(triangles, tmpTriangles);
 	}
 	
-	assert(vertexes.size() == predictedTriangleCount);
+	assert(vertexes.size() == predictedVertexCount);
+	assert(triangles.size() == predictedTriangleCount);
+	assert(cache.size() == predictedCacheSize);
 	
 	return std::make_pair(vertexes, triangles);
 }
