@@ -47,7 +47,7 @@ unsigned int midVertexForEdge(
 
 std::vector<glm::vec<3, unsigned int>> subdivideMesh(
 		std::vector<glm::vec3> &vertexes,
-	const std::vector<glm::vec<3, unsigned int>> &triangles
+		const std::vector<glm::vec<3, unsigned int>> &triangles
 ) {
 	std::vector<glm::vec<3, unsigned int>> result;
 	MeshEdgeCache cache;
