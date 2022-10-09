@@ -102,7 +102,7 @@ std::pair<std::vector<glm::vec3>, std::vector<glm::vec<3, unsigned int>>> genera
 	cache.reserve(predictedCacheSize);
 	vertexes.reserve(predictedVertexCount);
 	triangles.reserve(predictedTriangleCount);
-	tmpTriangles.reserve(predictedTriangleCount);
+	tmpTriangles.reserve(predictedTriangleCount / 4);
 	
 	for (int i = 0; i < subdivisionCount; i++) {
 		subdivideMesh(vertexes, triangles, cache, tmpTriangles);
@@ -111,6 +111,7 @@ std::pair<std::vector<glm::vec3>, std::vector<glm::vec<3, unsigned int>>> genera
 	
 	assert(vertexes.size() == predictedVertexCount);
 	assert(triangles.size() == predictedTriangleCount);
+	assert(tmpTriangles.size() == predictedTriangleCount / 4);
 	assert(cache.size() == predictedCacheSize);
 	
 	return std::make_pair(vertexes, triangles);
