@@ -79,6 +79,7 @@ std::pair<std::vector<glm::vec3>, std::vector<glm::vec<3, unsigned int>>> genera
 			{N, Z, X}, {N, Z,-X}, {N,-Z,X}, {N,-Z,-X},
 			{Z, X, N}, {-Z, X, N}, {Z,-X,N}, {-Z,-X, N}
 	};
+	
 	std::vector<glm::vec<3, unsigned int>> triangles = {
 			{0, 4, 1}, {0, 9, 4}, {9, 5, 4}, {4, 5, 8}, {4, 8, 1},
 			{8, 10, 1}, {8, 3, 10}, {5, 3, 8}, {5, 2, 3}, {2, 7, 3},
@@ -86,9 +87,17 @@ std::pair<std::vector<glm::vec3>, std::vector<glm::vec<3, unsigned int>>> genera
 			{6, 1, 10}, {9, 0, 11}, {9, 11, 2}, {9, 2, 5}, {7, 2, 11}
 	};
 	
+	auto predictedTriangleCount = vertexes.size();
+	for (int i = 0; i < subdivisionCount; i++) {
+		predictedTriangleCount = predictedTriangleCount * 4 - 6;
+	}
+	vertexes.reserve(predictedTriangleCount);
+	
 	for (int i = 0; i < subdivisionCount; i++) {
 		triangles = subdivideMesh(vertexes, triangles);
 	}
+	
+	assert(vertexes.size() == predictedTriangleCount);
 	
 	return std::make_pair(vertexes, triangles);
 }
