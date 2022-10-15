@@ -15,7 +15,7 @@ size_t test_font_loader(std::string_view fontData) {
 	return textureData.size() * charMap.size();
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	auto start = std::chrono::steady_clock::now();
 	auto count = 10000;
 	for (int i = 0; i < count; i++) {
@@ -27,7 +27,12 @@ int main() {
 	
 	std::string fontData;
 	{
-		std::ifstream f("assets/DroidSans-32.pf2", std::ios::binary);
+		std::string prefix = argv[0];
+		while (!prefix.empty() && prefix.back() != '/' && prefix.back() != '\\') {
+			prefix.pop_back();
+		}
+		std::ifstream f(prefix + "assets/DroidSans-32.pf2", std::ios::binary);
+		assert(f.is_open());
 		f.seekg(0, std::ios::end);
 		fontData.resize(f.tellg());
 		f.seekg(0);
