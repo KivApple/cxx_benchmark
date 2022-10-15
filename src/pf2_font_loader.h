@@ -36,9 +36,8 @@ class PF2FontLoader {
 	int m_maxCharHeight = 0;
 	int m_ascent = 0;
 	int m_descent = 0;
-	std::unordered_map<int, int> m_charMap;
-	std::unordered_map<uint32_t, std::tuple<int, bool>> m_charIndexes;
-	std::vector<FontGlyphInfo> m_glyphs;
+	std::unordered_map<int, FontGlyphInfo> m_charMap;
+	std::unordered_map<uint32_t, std::pair<uint32_t, size_t>> m_charIndexes;
 	std::vector<glm::vec<4, uint8_t>> m_textureData;
 	int m_colCount = 0;
 	int m_textureWidth = 0;
@@ -57,8 +56,7 @@ public:
 	
 	[[nodiscard]] std::tuple<
 		std::vector<glm::vec<4, uint8_t>>,
-		std::unordered_map<int, int>,
-		std::vector<FontGlyphInfo>
+		std::unordered_map<int, FontGlyphInfo>
 	> load();
 	
 };

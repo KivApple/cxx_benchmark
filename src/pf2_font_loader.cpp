@@ -78,7 +78,6 @@ uint16_t PF2FontLoader::readUInt16() {
 void PF2FontLoader::parseCharIndex() {
 	auto endPos = m_deserializer.adapter().currentReadPos() + m_curSectionLength;
 	PF2CharIndexItem item = {};
-	m_charMap.reserve(m_curSectionLength / sizeof(PF2CharIndexItem));
 	m_charIndexes.reserve(m_curSectionLength / sizeof(PF2CharIndexItem));
 	while (
 			m_deserializer.adapter().currentReadPos() < endPos &&
@@ -93,11 +92,7 @@ void PF2FontLoader::parseCharIndex() {
 			m_deserializer.adapter().error(bitsery::ReaderError::InvalidData);
 			break;
 		}
-		m_charMap.emplace(item.unicodeCodePoint, item.offset);
-		auto it = m_charIndexes.find(item.offset);
-		if (it == m_charIndexes.end()) {
-			m_charIndexes.emplace(item.offset, std::make_tuple(m_charIndexes.size(), false));
-		}
+		m_charIndexes.emplace(item.unicodeCodePoint, std::make_pair(item.offset, m_charMap.size()));
 	}
 	/* spdlog::trace(
 			"PF2 font character index has {} Unicode code point(s) ({} unique glyph(s))",
@@ -180,7 +175,6 @@ void PF2FontLoader::parseCharBitmap(int index, const PF2CharHeader &header, Font
 }
 
 void PF2FontLoader::parseDataSection() {
-	m_glyphs.resize(m_charIndexes.size());
 	m_colCount = static_cast<int>(std::ceil(std::sqrt(
 			static_cast<float>(m_charIndexes.size()) *
 			static_cast<float>(m_maxCharHeight) /
@@ -189,58 +183,47 @@ void PF2FontLoader::parseDataSection() {
 	m_textureWidth = m_colCount * m_maxCharWidth;
 	m_textureHeight = static_cast<int>((m_charIndexes.size() + m_colCount - 1) / m_colCount * m_maxCharHeight);
 	m_textureData.resize(m_textureWidth * m_textureHeight);
+	m_charMap.reserve(m_charIndexes.size());
 	PF2CharHeader header = {};
-	for (auto &item : m_charMap) {
-		auto &index = m_charIndexes[item.second];
-		if (!std::get<bool>(index)) {
-			m_deserializer.adapter().currentReadPos(item.second);
-			m_deserializer.object(header);
-			auto i = std::get<int>(index);
-			parseCharBitmap(i, header, m_glyphs[i]);
-			std::get<bool>(index) = true;
-		}
-		item.second = std::get<int>(index);
+	for (auto &item : m_charIndexes) {
+		m_deserializer.adapter().currentReadPos(item.second.first);
+		m_deserializer.object(header);
+		FontGlyphInfo glyphInfo = {};
+		parseCharBitmap(item.second.second, header, glyphInfo);
+		m_charMap.emplace(item.first, glyphInfo);
 	}
 }
 
 std::tuple<
 		std::vector<glm::vec<4, uint8_t>>,
-		std::unordered_map<int, int>,
-		std::vector<FontGlyphInfo>
+		std::unordered_map<int, FontGlyphInfo>
 > PF2FontLoader::load() {
 	assert(!m_started);
 	while (readSection()) {
 		parseSection();
 	}
-	if (!m_charMap.empty()) {
-		if (!m_charMap.empty() && m_curSectionTag == "DATA") {
-			parseDataSection();
-			/* spdlog::debug(
-					"Loaded PF2 font \"{}\" ({} characters(s), {} glyph(s), {}x{} generated texture)",
-					m_name,
-					m_charMap.size(),
-					m_charIndexes.size(),
-					m_textureWidth,
-					m_textureHeight
-			); */
-			return std::make_tuple<
-					std::vector<glm::vec<4, uint8_t>>,
-					std::unordered_map<int, int>,
-					std::vector<FontGlyphInfo>
-			>(
-					std::move(m_textureData),
-					std::move(m_charMap),
-					std::move(m_glyphs)
-			);
-		} else {
-			//spdlog::error("PF2 font has no \"DATA\" section");
-		}
+	if (!m_charIndexes.empty() && m_curSectionTag == "DATA") {
+		parseDataSection();
+		/* spdlog::debug(
+				"Loaded PF2 font \"{}\" ({} characters(s), {} glyph(s), {}x{} generated texture)",
+				m_name,
+				m_charMap.size(),
+				m_charIndexes.size(),
+				m_textureWidth,
+				m_textureHeight
+		); */
+		return std::make_tuple<
+				std::vector<glm::vec<4, uint8_t>>,
+				std::unordered_map<int, FontGlyphInfo>
+		>(
+				std::move(m_textureData),
+				std::move(m_charMap)
+		);
 	} else {
-		//spdlog::error("PF2 font has no characters");
+		//spdlog::error("PF2 font has no \"DATA\" section");
 	}
 	return std::make_tuple<
 			std::vector<glm::vec<4, uint8_t>>,
-			std::unordered_map<int, int>,
-			std::vector<FontGlyphInfo>
-	>({}, {{0, 0}}, {{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, 1.0f}});
+			std::unordered_map<int, FontGlyphInfo>
+	>({}, {{0, {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, 1.0f}}});
 }

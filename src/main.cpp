@@ -11,8 +11,8 @@ size_t test_icosphere() {
 
 size_t test_font_loader(std::string_view fontData) {
 	PF2FontLoader loader("font", fontData);
-	auto [textureData, charMap, glyphs] = loader.load();
-	return textureData.size() * charMap.size() * glyphs.size();
+	auto [textureData, charMap] = loader.load();
+	return textureData.size() * charMap.size();
 }
 
 int main() {
