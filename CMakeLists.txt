@@ -10,7 +10,7 @@ endif()
 add_subdirectory(lib/glm)
 add_subdirectory(lib/bitsery)
 
-add_executable(cxx_benchmark src/main.cpp src/pf2_font_loader.cpp)
+add_executable(cxx_benchmark src/main.cpp src/icosphere.cpp src/pf2_font_loader.cpp)
 target_link_libraries(cxx_benchmark glm::glm Bitsery::bitsery)
 
 configure_file(assets/DroidSans-32.pf2 assets/DroidSans-32.pf2 COPYONLY)
