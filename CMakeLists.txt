@@ -8,6 +8,9 @@ if(WIN32 AND NOT MSVC AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 add_subdirectory(lib/glm)
+add_subdirectory(lib/bitsery)
 
-add_executable(cxx_benchmark src/main.cpp)
-target_link_libraries(cxx_benchmark glm::glm)
+add_executable(cxx_benchmark src/main.cpp src/pf2_font_loader.cpp)
+target_link_libraries(cxx_benchmark glm::glm Bitsery::bitsery)
+
+configure_file(assets/DroidSans-32.pf2 assets/DroidSans-32.pf2 COPYONLY)
