@@ -4,3 +4,6 @@
 [submodule "lib/bitsery"]
 	path = lib/bitsery
 	url = https://github.com/fraillt/bitsery.git
+[submodule "lib/abseil-cpp"]
+	path = lib/abseil-cpp
+	url = https://github.com/abseil/abseil-cpp.git

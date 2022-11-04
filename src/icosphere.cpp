@@ -1,6 +1,6 @@
 #include <cassert>
 #include <vector>
-#include <unordered_map>
+#include <absl/container/flat_hash_map.h>
 #include <glm/vec3.hpp>
 #include <glm/geometric.hpp>
 #include "icosphere.h"
@@ -19,12 +19,7 @@ template<typename T1, typename T2> struct PairHasher {
 	}
 };
 
-using MeshEdgeCache = std::unordered_map<
-		std::pair<unsigned int, unsigned int>,
-		unsigned int,
-		PairHasher<unsigned int, unsigned int>,
-		std::equal_to<>
->;
+using MeshEdgeCache = absl::flat_hash_map<std::pair<unsigned int, unsigned int>, unsigned int>;
 
 unsigned int midVertexForEdge(
 		MeshEdgeCache &cache,

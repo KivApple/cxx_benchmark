@@ -196,7 +196,7 @@ void PF2FontLoader::parseDataSection() {
 
 std::tuple<
 		std::vector<glm::vec<4, uint8_t>>,
-		std::unordered_map<int, FontGlyphInfo>
+		absl::flat_hash_map<int, FontGlyphInfo>
 > PF2FontLoader::load() {
 	assert(!m_started);
 	while (readSection()) {
@@ -214,7 +214,7 @@ std::tuple<
 		); */
 		return std::make_tuple<
 				std::vector<glm::vec<4, uint8_t>>,
-				std::unordered_map<int, FontGlyphInfo>
+				absl::flat_hash_map<int, FontGlyphInfo>
 		>(
 				std::move(m_textureData),
 				std::move(m_charMap)
@@ -224,6 +224,6 @@ std::tuple<
 	}
 	return std::make_tuple<
 			std::vector<glm::vec<4, uint8_t>>,
-			std::unordered_map<int, FontGlyphInfo>
+			absl::flat_hash_map<int, FontGlyphInfo>
 	>({}, {{0, {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, 1.0f}}});
 }
