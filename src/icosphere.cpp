@@ -45,7 +45,7 @@ void subdivideMesh(
 		MeshEdgeCache &cache,
 		std::vector<glm::vec<3, unsigned int>> &result
 ) {
-	cache.clear();
+	cache.erase(cache.begin(), cache.end());
 	result.clear();
 	for (auto &triangle : triangles) {
 		unsigned int mid[] = {
